@@ -37,4 +37,4 @@ Known bugs
 5 -We will find more for sure.
 
 Screenshots
-Coming...
+![alt text](https://github.com/andrezanna/NotchTest/QuickMemo_2019_03_02-15-09-28.jpg)
