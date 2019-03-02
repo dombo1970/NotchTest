@@ -37,5 +37,6 @@ Known bugs
 5 -We will find more for sure.
 
 Screenshots
-Coming...
+![alt text](https://github.com/andrezanna/NotchTest/images/Screenshot_2019-03-02-14-35-46-757_com.microsoft.launcher.png)
+![alt text](https://github.com/andrezanna/NotchTest/images/Screenshot_2019-03-02-14-41-26-261_com.microsoft.launcher.png)
 
