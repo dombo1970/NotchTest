@@ -8,7 +8,7 @@ It shows 7 icons, and in case a more icon.
 
 Instructions
 
-1- Download app (this was tricky!:))
+1- Download app  ![alt text](https://drive.google.com/open?id=1kNpnNuICry0RKnUMmsGsNSGpiNTzvpnX) (this was tricky!:))
 
 2- When open it automatically launches Overlay request and notification request, you must accept them both. 
 
