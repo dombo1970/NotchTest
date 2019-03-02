@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">NotchTest</string>
+    <string name="title_activity_main">NotchTest</string>
+    <string name="accessibility_service_description">Hide when in fullscreen</string>
+
+</resources>
