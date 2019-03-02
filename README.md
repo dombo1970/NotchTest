@@ -5,6 +5,7 @@ Notch Notifications for pocophone f1
 Test application for notification in notch in pocophone f1.
 There's still no useful UI, sorry but it's only to define wheter this app is useful and runnable on multiple devices.
 It shows 7 icons, and in case a more icon.
+!!!ALERT!!! Source Code contains Italian's bad words! :)
 
 Instructions
 
@@ -37,4 +38,4 @@ Known bugs
 5 -We will find more for sure.
 
 Screenshots
-![alt text](https://github.com/andrezanna/NotchTest/QuickMemo_2019_03_02-15-09-28.jpg)
+![alt text](https://github.com/andrezanna/NotchTest/blob/master/QuickMemo_2019_03_02-15-09-28.jpg)
