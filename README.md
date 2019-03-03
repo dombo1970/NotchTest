@@ -39,3 +39,6 @@ Known bugs
 
 Screenshots
 ![alt text](https://github.com/andrezanna/NotchTest/blob/master/QuickMemo_2019_03_02-15-09-28.jpg)
+
+
+![alt text](https://github.com/andrezanna/NotchTest/blob/master/IMG_20190303_113941.jpg)
