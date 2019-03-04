@@ -1,32 +1,28 @@
 package zanini.andrea.notchtest;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.drawable.Icon;
 import android.os.Environment;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
+
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +37,8 @@ public class NotificationService extends NotificationListenerService {
 
     View oldOverlay;
     List<String> packages= new ArrayList<>();
-
+    int color=Color.WHITE;
+    boolean fullscreen=false;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -137,83 +134,106 @@ public class NotificationService extends NotificationListenerService {
 
     void reDrawOverlay(){
         Log.d("ADDING","Normal Icon");
-        LinearLayout overlay=(LinearLayout)oldOverlay;
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        LinearLayout overlay=(LinearLayout) getOverlay(wm.getDefaultDisplay().getRotation());
         packages.clear();
-        overlay.removeAllViewsInLayout();
-        for(StatusBarNotification n :getActiveNotifications()){
-            Log.d("ANALYZING",n.getPackageName()+" - "+ n.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
-            if (n.getPackageName().equals("com.xiaomi.joyose") ) {
-                Log.d("SKIPPING","UnUseful notification");
-                continue;
-            }
-            if(packages.contains(n.getPackageName())){
-                Log.d("SKIPPING","Icon already in notch");
-                continue;
-            }else{
-                packages.add(n.getPackageName());
-            }
-            ImageView image;
-            if(packages.size()>7){
-                Log.d("ADDING","More notification icon");
-                image=createNotificationImage(Icon.createWithResource(getBaseContext(),R.drawable.ic_stat_name));
-            }else {
-                Log.d("ADDING","Normal Icon");
-                image=createNotificationImage(n.getNotification().getSmallIcon());
-            }
+        try {
+            overlay.removeAllViewsInLayout();
+        }catch(Exception e){
+            Log.d("SKIPPING","No Views to remove");
+        }
+        for(StatusBarNotification n :getActiveNotifications()) {
             try {
-                ((LinearLayout) overlay).addView(image);
+                Log.d("ANALYZING", n.getPackageName() + " - " + n.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
+                if (n.getPackageName().equals("com.xiaomi.joyose")) {
+                    Log.d("SKIPPING", "UnUseful notification");
+                    continue;
+                }
+                if (packages.contains(n.getPackageName())) {
+                    Log.d("SKIPPING", "Icon already in notch");
+                    continue;
+                } else {
+                    packages.add(n.getPackageName());
+                }
+                ImageView image;
+                if (packages.size() > 7) {
+                    Log.d("ADDING", "More notification icon");
+                    image = createNotificationImage(Icon.createWithResource(getBaseContext(), R.drawable.ic_stat_name));
+                } else {
+                    Log.d("ADDING", "Normal Icon");
+                    image = createNotificationImage(n.getNotification().getSmallIcon());
+                }
+                try {
+                    overlay.addView(image);
+                } catch (Exception e) {
+                    Log.d("FANCULO", e.getMessage());
+                }
+                if (packages.size() > 7) {
+                    break;
+                }
+
             } catch (Exception e) {
-                Log.d("FANCULO", e.getMessage());
-            }
-            if(packages.size()>7){
-                break;
+                writeLog("ERROR caused by: " + e.getMessage());
             }
         }
         drawOverlay(overlay);
     }
 
 
+    View getOverlay(int rotation){
+        View overlay = new LinearLayout(this);
+        LinearLayout.LayoutParams overlayParams=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
+        overlay.setLayoutParams(overlayParams);
+        ((LinearLayout) overlay).setOrientation((rotation==Surface.ROTATION_0 || rotation==Surface.ROTATION_180 )?LinearLayout.HORIZONTAL:LinearLayout.VERTICAL);
+        return overlay;
+    }
+
+
 
     void initOverlay(){
         Log.d("CALLED","INIT");
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         //DEFINING OVERLAY LAYOUT
-        View overlay = new LinearLayout(this);
-        LinearLayout.LayoutParams overlayParams=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
-        overlayParams.setMargins(10,-30,0,0);
-        overlayParams.width=500;
-        overlay.setLayoutParams(overlayParams);
-        ((LinearLayout) overlay).setOrientation(LinearLayout.HORIZONTAL);
-
-        //ADDING ACTIVE NOTIFICATIONS
-        for(StatusBarNotification n :getActiveNotifications()){
-            Log.d("ANALYZING",n.getPackageName()+" - "+ n.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
-            if (n.getPackageName().equals("com.xiaomi.joyose") ) {
-                Log.d("SKIPPING","UnUseful notification");
-                continue;
-            }
-            if(packages.contains(n.getPackageName())){
-                Log.d("SKIPPING","Icon already in notch");
-                continue;
-            }else{
-                packages.add(n.getPackageName());
-            }
-            ImageView image;
-            if(packages.size()>7){
-                Log.d("ADDING","More notification icon");
-                image=createNotificationImage(Icon.createWithResource(getBaseContext(),R.drawable.ic_stat_name));
-            }else {
-                Log.d("ADDING","Normal Icon");
-                image=createNotificationImage(n.getNotification().getSmallIcon());
-            }
-            try {
-                ((LinearLayout) overlay).addView(image);
-            } catch (Exception e) {
-                Log.d("FANCULO", e.getMessage());
-            }
-            if(packages.size()>7){
-                break;
-            }
+        View overlay= null;
+        if (wm != null) {
+            overlay = getOverlay(wm.getDefaultDisplay().getRotation());
         }
+        //ADDING ACTIVE NOTIFICATIONS
+
+            for (StatusBarNotification n : getActiveNotifications()) {
+                try {
+                Log.d("ANALYZING", n.getPackageName() + " - " + n.getNotification().extras.getCharSequence(Notification.EXTRA_TEXT).toString());
+                if (n.getPackageName().equals("com.xiaomi.joyose")) {
+                    Log.d("SKIPPING", "UnUseful notification");
+                    continue;
+                }
+                if (packages.contains(n.getPackageName())) {
+                    Log.d("SKIPPING", "Icon already in notch");
+                    continue;
+                } else {
+                    packages.add(n.getPackageName());
+                }
+                ImageView image;
+                if (packages.size() > 7) {
+                    Log.d("ADDING", "More notification icon");
+                    image = createNotificationImage(Icon.createWithResource(getBaseContext(), R.drawable.ic_stat_name));
+                } else {
+                    Log.d("ADDING", "Normal Icon");
+                    image = createNotificationImage(n.getNotification().getSmallIcon());
+                }
+                try {
+                    ((LinearLayout) overlay).addView(image);
+                } catch (Exception e) {
+                    Log.d("FANCULO", e.getMessage());
+                }
+                if (packages.size() > 7) {
+                    break;
+                }
+                }catch (Exception e){
+                    writeLog("ERROR caused by: "+ e.getMessage());
+                }
+            }
+
         drawOverlay(overlay);
 
     }
@@ -231,6 +251,7 @@ public class NotificationService extends NotificationListenerService {
 
     void drawOverlay(View overlay){
         WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -291,7 +312,27 @@ public class NotificationService extends NotificationListenerService {
         }
 
     }
+/*
 
+    public class UpdateConditionsReceiver extends BroadcastReceiver {
+        public String ROTATION_UPDATE="zanini.andrea.ROTATION_UPDATE";
+        public String FULLSCREEN_UPDATE="zanini.andrea.FULLSCREEN_UPDATE";
+        public String COLOR_CHANGE="zanini.andrea.COLOR_CHANGE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(ROTATION_UPDATE)) {
+                reDrawOverlay();
+
+            }else if(intent.getAction().equals(FULLSCREEN_UPDATE)){
+                return;
+            }else if(intent.getAction().equals(COLOR_CHANGE)){
+                color=(color==Color.WHITE)?Color.BLACK:Color.WHITE;
+            }
+
+        }
+    }
+*/
 
 
 }
